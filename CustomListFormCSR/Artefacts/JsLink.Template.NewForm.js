@@ -109,7 +109,7 @@ function AddResourcesToHeader() {
 function viewTemplate(ctx) {
     try {
         //Call the function to fetch the Fields enabled in the "All Items" List View
-        GetDefaultListViewFields();
+        GetDefaultListViewFields(ctx);
 
         //Get the Context Fields and seperate them into arrays that help build the Custom Form Layout 
         var fieldArray = ctx.ListSchema.Field;
@@ -122,7 +122,7 @@ function viewTemplate(ctx) {
                     if (value.Name == "Attachments") {
                         var itemObject = {};
                         itemObject["Name"] = value.Title;
-                        itemObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                        itemObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                         attachmentsFieldArray.push(itemObject);
                     }
                     else if(value.Type == "URL"){                        
@@ -144,19 +144,19 @@ function viewTemplate(ctx) {
                     var fieldObject = {};
                     fieldObject["Name"] = value.Title;
                     fieldObject["Required"] = value.Required;
-                    fieldObject["InternalName"] = value.InternalName;
-                    fieldObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                    fieldObject["InternalName"] = value.Name;
+                    fieldObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                     requiredMetadataFieldsArray.push(fieldObject);
                 }
                 else {
-                    var boolExists = $.inArray(value.InternalName, listViewFieldsArray);
+                    var boolExists = $.inArray(value.Name, listViewFieldsArray);
                     if (boolExists != -1) {
                         //Add to array only if the field is selected in the All Items default list view.                    
                         var fieldObject = {};
                         fieldObject["Name"] = value.Title;
                         fieldObject["Required"] = value.Required;
-                        fieldObject["InternalName"] = value.InternalName;
-                        fieldObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                        fieldObject["InternalName"] = value.Name;
+                        fieldObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                         filteredMetadataFieldsArray.push(fieldObject);
                     }
                 }
@@ -172,19 +172,19 @@ function viewTemplate(ctx) {
                     var fieldObject = {};
                     fieldObject["Name"] = value.Title;
                     fieldObject["Required"] = value.Required;
-                    fieldObject["InternalName"] = value.InternalName;
-                    fieldObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                    fieldObject["InternalName"] = value.Name;
+                    fieldObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                     requiredNoteFieldsArray.push(fieldObject);
                 }
                 else {
-                    var boolExists = $.inArray(value.InternalName, listViewFieldsArray);
+                    var boolExists = $.inArray(value.Name, listViewFieldsArray);
                     if (boolExists != -1) {
                         //Add to array only if the field is selected in the All Items default list view.                    
                         var fieldObject = {};
                         fieldObject["Name"] = value.Title;
                         fieldObject["Required"] = value.Required;
-                        fieldObject["InternalName"] = value.InternalName;
-                        fieldObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                        fieldObject["InternalName"] = value.Name;
+                        fieldObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                         filteredNoteFieldsArray.push(fieldObject);
                     }
                 }
@@ -200,26 +200,26 @@ function viewTemplate(ctx) {
                     var fieldObject = {};
                     fieldObject["Name"] = value.Title;
                     fieldObject["Required"] = value.Required;
-                    fieldObject["InternalName"] = value.InternalName;
-                    fieldObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                    fieldObject["InternalName"] = value.Name;
+                    fieldObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                     requiredPictureFieldsArray.push(fieldObject);
                 }
                 else {
-                    var boolExists = $.inArray(value.InternalName, listViewFieldsArray);
+                    var boolExists = $.inArray(value.Name, listViewFieldsArray);
                     if (boolExists != -1) {
                         //Add to array only if the field is selected in the All Items default list view.                    
                         var fieldObject = {};
                         fieldObject["Name"] = value.Title;
                         fieldObject["Required"] = value.Required;
-                        fieldObject["InternalName"] = value.InternalName;
-                        fieldObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                        fieldObject["InternalName"] = value.Name;
+                        fieldObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                         filteredPictureFieldsArray.push(fieldObject);
                     }
                 }
             })
         }
 
-        if (filteredMetadataFieldsArray.length > 0) {
+        if (filteredMetadataFieldsArray.length > 0 || requiredMetadataFieldsArray.length > 0) {
             //Add all required fields by default to the sorted Metadata Array.
             $.each(requiredMetadataFieldsArray, function (key, value) {
                 sortedMetadataFieldsArray.push(value);
@@ -244,7 +244,7 @@ function viewTemplate(ctx) {
             });
         }
 
-        if (filteredNoteFieldsArray.length > 0) {
+        if (filteredNoteFieldsArray.length > 0 || requiredNoteFieldsArray.length > 0) {
             //Add all required fields by default to the sorted Metadata Array.
             $.each(requiredNoteFieldsArray, function (key, value) {
                 sortedNoteFieldsArray.push(value);
@@ -267,7 +267,7 @@ function viewTemplate(ctx) {
             });
         }
 
-        if (filteredPictureFieldsArray.length > 0) {
+        if (filteredPictureFieldsArray.length > 0 || requiredPictureFieldsArray.length > 0) {
             //Add all required fields by default to the sorted Metadata Array.
             $.each(requiredPictureFieldsArray, function (key, value) {
                 sortedPictureFieldsArray.push(value);
@@ -300,10 +300,13 @@ function viewTemplate(ctx) {
 }
 
 //This method gets the fields from the default "All Items" List View.
-function GetDefaultListViewFields() {
+function GetDefaultListViewFields(ctx) {
     try {
+	var listId = "";
+	managerField = SPClientTemplates.Utility.GetFormContextForCurrentField(ctx); 
+	listId = managerField.listAttributes.Id; 
         jQuery.ajax({
-            url: decodeURIComponent(_spPageContextInfo.webAbsoluteUrl) + "/_api/web/lists/getbytitle('" + _spPageContextInfo.listTitle + "')/Views/getbytitle('All Items')/ViewFields",
+            url: decodeURIComponent(_spPageContextInfo.webAbsoluteUrl) + "/_api/web/lists/getbyid('" + listId + "')/Views/getbytitle('All Items')/ViewFields",
             type: "GET",
             async: false,
             headers: {

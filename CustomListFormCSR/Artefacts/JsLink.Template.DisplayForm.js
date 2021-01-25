@@ -102,7 +102,7 @@ function AddResourcesToHeader() {
 function viewTemplate(ctx) {
     try {
         //Call the function to fetch the Fields enabled in the "All Items" List View
-        GetDefaultListViewFields();
+        GetDefaultListViewFields(ctx);
 
         //Get the Context Fields and seperate them into arrays that help build the Custom Form Layout 
         var contextFieldsArray = ctx.ListSchema.Field;
@@ -111,22 +111,22 @@ function viewTemplate(ctx) {
                if (value.Type == "Note") {
                     var itemObject = {};
                     itemObject["Name"] = value.Title;
-                    itemObject["InternalName"] = value.InternalName;
-                    itemObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                    itemObject["InternalName"] = value.Name;
+                    itemObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                     noteFieldsArray.push(itemObject);
                 }
                 else {
                     if (value.Name == "Attachments") {
                         var itemObject = {};
                         itemObject["Name"] = value.Title;
-                        itemObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                        itemObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                         attachmentsFieldArray.push(itemObject);
                     }
                     else if(value.Type == "URL"){
                         var itemObject = {};
                         itemObject["Name"] = value.Title;
-                        itemObject["InternalName"] = value.InternalName;
-                        itemObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                        itemObject["InternalName"] = value.Name;
+                        itemObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                         pictureFieldsArray.push(itemObject);
                     }
                     else {
@@ -141,7 +141,7 @@ function viewTemplate(ctx) {
                 else {
                     var itemObject = {};
                     itemObject["Name"] = value.Title;
-                    itemObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                    itemObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                     footerArray.push(itemObject);
                 }
             }
@@ -151,13 +151,13 @@ function viewTemplate(ctx) {
         if (listViewFieldsArray.length > 0) {
             //Check the field information available for data binding.
             $.each(metadataArray, function (key, value) {
-                var boolExists = $.inArray(value.InternalName, listViewFieldsArray);
+                var boolExists = $.inArray(value.Name, listViewFieldsArray);
                 if (boolExists != -1) {
                     //Add to array only if the field is selected in the All Items default list view.                    
                     var fieldObject = {};
                     fieldObject["Name"] = value.Title;
-                    fieldObject["InternalName"] = value.InternalName;
-                    fieldObject["ValueObject"] = getSPFieldRender(ctx, value.InternalName);
+                    fieldObject["InternalName"] = value.Name;
+                    fieldObject["ValueObject"] = getSPFieldRender(ctx, value.Name);
                     filteredMetadataFieldsArray.push(fieldObject);
                 }
             })
@@ -259,10 +259,13 @@ function viewTemplate(ctx) {
 }
 
 //This method gets the fields from the default "All Items" List View.
-function GetDefaultListViewFields() {
+function GetDefaultListViewFields(ctx) {
     try {
+	var listId = "";
+	managerField = SPClientTemplates.Utility.GetFormContextForCurrentField(ctx); 
+	listId = managerField.listAttributes.Id; 
         jQuery.ajax({
-            url: decodeURIComponent(_spPageContextInfo.webAbsoluteUrl) + "/_api/web/lists/getbytitle('" + _spPageContextInfo.listTitle + "')/Views/getbytitle('All Items')/ViewFields",
+            url: decodeURIComponent(_spPageContextInfo.webAbsoluteUrl) + "/_api/web/lists/getbyid('" + listId + "')/Views/getbytitle('All Items')/ViewFields",
             type: "GET",
             async: false,
             headers: {
