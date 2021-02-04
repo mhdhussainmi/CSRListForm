@@ -179,6 +179,11 @@
 			[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client")
 			[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client.Runtime")	
 		
+			#SharePoint DLL are also available in DLL folder, Change the below path and map to the excat dll loaction to load dll's 
+			#Load SharePoint CSOM Assemblies
+			#Add-Type -Path "D:\dll\Microsoft.SharePoint.Client.dll"
+			#Add-Type -Path "D:\dll\Microsoft.SharePoint.Client.Runtime.dll"	
+		
 			Write-Host "`n"
 			Write-Host "OPERATIONS: Starting to upload artefacts and updating JSLink ListFormWebPart Property for All Forms" -ForegroundColor Magenta
 			Write-Host ""
